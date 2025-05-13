@@ -505,6 +505,11 @@
         // Проверяем размер при изменении размера окна
         window.addEventListener('resize', checkScreenSize);
         
+        // Переменные для обработки pinch-to-zoom на мобильных устройствах
+        let initialPinchDistance = 0;
+        let initialScale = 0;
+        let isPinching = false;
+        
         // Check browser support for PDF.js
         const useCanvas = typeof window.pdfjsLib !== 'undefined';
         const loader = document.getElementById('loader');
@@ -543,6 +548,53 @@
         function updateZoomLevel() {
             zoomLevel.textContent = Math.round(scale * 100) + '%';
         }
+        
+        // Функция для вычисления расстояния между двумя точками касания
+        function calculateDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        // Добавляем обработчики событий touch для масштабирования
+        canvasContainer.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                // Начало pinch-жеста
+                isPinching = true;
+                initialPinchDistance = calculateDistance(e.touches[0], e.touches[1]);
+                initialScale = scale;
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        canvasContainer.addEventListener('touchmove', function(e) {
+            if (isPinching && e.touches.length === 2) {
+                // Обработка pinch-жеста для масштабирования
+                const currentDistance = calculateDistance(e.touches[0], e.touches[1]);
+                const scaleFactor = currentDistance / initialPinchDistance;
+                const newScale = Math.min(Math.max(initialScale * scaleFactor, 0.5), 3.0);
+                
+                if (Math.abs(newScale - scale) > 0.01) {
+                    scale = newScale;
+                    updateZoomLevel();
+                    if (!scrollMode) {
+                        // В постраничном режиме перерисовываем текущую страницу
+                        renderPage(currentPage);
+                    } else {
+                        // В непрерывном режиме перерисовываем все страницы
+                        renderAllPages();
+                    }
+                }
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        canvasContainer.addEventListener('touchend', function(e) {
+            if (isPinching) {
+                // Завершение pinch-жеста
+                isPinching = false;
+            }
+        });
         
         try {
             if (useCanvas) {
