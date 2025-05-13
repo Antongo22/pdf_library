@@ -1,0 +1,880 @@
+{% extends "base.html" %}
+
+{% block title %}PDF Library - {{ pdf_name }}{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/web/pdf_viewer.min.css">
+<style>
+    .pdf-viewer-container {
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+    }
+    
+    .pdf-header {
+        margin-bottom: 20px;
+    }
+    
+    .pdf-header h1 {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+    }
+    
+    .pdf-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .pdf-btn {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+    
+    .pdf-zoom-controls {
+        margin-left: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .pdf-download {
+        margin-left: auto;
+    }
+    
+    #pdf-viewer {
+        width: 100%;
+        height: 80vh;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--background-dark);
+        overflow: auto;
+        position: relative;
+    }
+    
+    .mobile-controls {
+        display: none; /* Скрыто по умолчанию для всех устройств */
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(42, 42, 42, 0.9);
+        padding: 15px;
+        justify-content: space-between;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+    }
+    
+    .mobile-controls button {
+        flex: 1;
+        margin: 0 5px;
+        padding: 12px;
+        font-size: 1.1rem;
+        border-radius: 4px;
+    }
+    
+    #pdf-embed {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    
+    .loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+    }
+    
+    .loader {
+        border: 4px solid rgba(255, 107, 0, 0.3);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Улучшенный стиль просмотра PDF */
+    .pdf-header {
+        position: relative;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    /* Стиль кнопок улучшен для лучшего тактильного восприятия */
+    .pdf-btn {
+        font-size: 0.9rem;
+        padding: 10px 18px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .pdf-btn:active {
+        transform: translateY(2px);
+        box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Улучшенные мобильные стили */
+    @media (max-width: 768px) {
+        /* Скрываем верхние кнопки */
+        .pdf-controls {
+            display: none;
+        }
+        
+        /* Отображение заголовка */
+        .pdf-header h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        #pdf-viewer {
+            height: calc(100vh - 180px);
+            padding-bottom: 70px; /* Space for mobile controls */
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Стилизация мобильных кнопок - только для мобильных устройств */
+        .mobile-controls {
+            display: flex; /* Показываем в мобильной версии */
+            padding: 12px 15px;
+            background-color: rgba(26, 26, 26, 0.95);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .mobile-controls button {
+            flex: 1;
+            margin: 0 8px;
+            padding: 14px 5px;
+            font-size: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        #mobile-page-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--card-bg);
+            padding: 0 15px;
+            border-radius: 8px;
+            min-width: 80px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Стиль мобильного просмотра PDF */
+        #canvas-container {
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        /* Нижняя кнопка скачивания */
+        .mobile-download {
+            position: fixed;
+            right: 20px;
+            bottom: 85px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-download:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Стили мобильного переключателя режима просмотра */
+        .mobile-view-toggle {
+            position: fixed;
+            top: 85px;
+            left: 20px;
+            z-index: 80; /* Уменьшен z-index, чтобы не перекрывать выпадающее меню */
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            border: none;
+            /* Удалены фильтры размытия, так как фон прозрачный */
+        }
+        
+        .switch-toggle-mobile {
+            position: relative;
+            display: block;
+            width: 60px;
+            height: 30px;
+            cursor: pointer;
+        }
+        
+        .switch-toggle-mobile input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider-toggle-mobile {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(20, 20, 20, 0.7);
+            transition: .3s ease-in-out;
+            border-radius: 30px;
+            overflow: hidden;
+        }
+        
+        .slider-toggle-mobile:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 2px;
+            bottom: 2px;
+            background: var(--gradient-primary);
+            transition: .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        input:checked + .slider-toggle-mobile:before {
+            transform: translateX(30px);
+        }
+        
+        .toggle-labels-mobile {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 7px;
+            pointer-events: none;
+            z-index: 1;
+            font-size: 0.8rem;
+        }
+        
+        .page-mode-mobile, .scroll-mode-mobile {
+            width: 30px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        input:not(:checked) + .slider-toggle-mobile + .toggle-labels-mobile .page-mode-mobile {
+            color: white;
+        }
+        
+        input:checked + .slider-toggle-mobile + .toggle-labels-mobile .scroll-mode-mobile {
+            color: white;
+        }
+    }
+    
+    /* Стили переключателя режима просмотра */
+    .view-mode-controls {
+        display: flex;
+        align-items: center;
+        margin-left: 15px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .view-mode-container {
+        background: transparent;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+        margin: 10px 0;
+    }
+    
+    .switch-toggle {
+        position: relative;
+        display: inline-block;
+        width: 80px;
+        height: 40px;
+        cursor: pointer;
+    }
+    
+    .switch-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider-toggle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(20, 20, 20, 0.7);
+        transition: .3s ease-in-out;
+        border-radius: 25px;
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+    
+    .slider-toggle:before {
+        position: absolute;
+        content: "";
+        height: 36px;
+        width: 40px;
+        left: 2px;
+        bottom: 2px;
+        background: var(--gradient-primary);
+        transition: .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-radius: 22px;
+        z-index: 2;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    
+    input:checked + .slider-toggle:before {
+        transform: translateX(36px);
+    }
+    
+    .toggle-labels {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0;
+        pointer-events: none;
+        z-index: 3;
+        font-weight: 500;
+    }
+    
+    .page-mode, .scroll-mode {
+        padding: 0 10px;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+        width: 40px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+    }
+    
+    .toggle-icon {
+        font-size: 1.2rem;
+        vertical-align: middle;
+        display: inline-block;
+        line-height: 1;
+    }
+    
+    input:not(:checked) + .slider-toggle + .toggle-labels .page-mode {
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    input:checked + .slider-toggle + .toggle-labels .scroll-mode {
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .toggle-icon {
+        margin-right: 5px;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pdf-viewer-container">
+    <div class="pdf-header">
+        <h1>{{ pdf_name }}</h1>
+        <div class="pdf-controls">
+            <button id="prev" class="pdf-btn"><i class="fas fa-chevron-left"></i> Предыдущая</button>
+            <div class="page-counter">
+                <span id="page-num">1</span> <span class="page-separator">/</span> <span id="page-count">0</span>
+            </div>
+            <button id="next" class="pdf-btn">Следующая <i class="fas fa-chevron-right"></i></button>
+            
+            <div class="pdf-zoom-controls">
+                <button id="zoom-out" class="pdf-btn"><i class="fas fa-search-minus"></i></button>
+                <span id="zoom-level">100%</span>
+                <button id="zoom-in" class="pdf-btn"><i class="fas fa-search-plus"></i></button>
+            </div>
+            
+            <div class="view-mode-container">
+                <div class="view-mode-controls">
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="view-mode-toggle">
+                        <span class="slider-toggle"></span>
+                        <span class="toggle-labels">
+                            <span class="page-mode"><i class="fas fa-file-alt toggle-icon"></i></span>
+                            <span class="scroll-mode"><i class="fas fa-align-justify toggle-icon"></i></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+            
+            <a href="{{ pdf_url }}" class="pdf-btn pdf-download" download>
+                <i class="fas fa-download"></i> Скачать
+            </a>
+        </div>
+    </div>
+    
+    <div id="pdf-viewer">
+        <!-- Fallback with direct embed if JavaScript is disabled -->
+        <div id="loader" class="loader-container">
+            <div class="loader"></div>
+        </div>
+        <div id="canvas-container" style="display: none;"></div>
+        <embed id="pdf-embed" src="{{ pdf_url }}" type="application/pdf" style="display: none;">
+        
+        <!-- Floating download button for mobile -->
+        <a href="{{ pdf_url }}" class="mobile-download" download>
+            <i class="fas fa-download"></i>
+        </a>
+        
+        <!-- Mobile view mode toggle -->
+        <div class="mobile-view-toggle">
+            <label class="switch-toggle-mobile">
+                <input type="checkbox" id="mobile-view-mode-toggle">
+                <span class="slider-toggle-mobile"></span>
+                <span class="toggle-labels-mobile">
+                    <span class="page-mode-mobile"><i class="fas fa-file-alt"></i></span>
+                    <span class="scroll-mode-mobile"><i class="fas fa-align-justify"></i></span>
+                </span>
+            </label>
+        </div>
+        
+        <!-- Mobile navigation controls at bottom -->
+        <div class="mobile-controls">
+            <button id="mobile-prev" class="pdf-btn"><i class="fas fa-chevron-left"></i> Пред.</button>
+            <span id="mobile-page-info">1 / 1</span>
+            <button id="mobile-next" class="pdf-btn">След. <i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Проверка размера экрана для скрытия/показа мобильных элементов
+        function checkScreenSize() {
+            const mobileControls = document.querySelector('.mobile-controls');
+            const mobileViewToggle = document.querySelector('.mobile-view-toggle');
+            
+            if (window.innerWidth <= 768) {
+                // Мобильный режим
+                if (mobileControls) mobileControls.style.display = 'flex';
+                if (mobileViewToggle) mobileViewToggle.style.display = 'block';
+            } else {
+                // ПК режим
+                if (mobileControls) mobileControls.style.display = 'none';
+                if (mobileViewToggle) mobileViewToggle.style.display = 'none';
+            }
+        }
+        
+        // Проверяем размер экрана при загрузке
+        checkScreenSize();
+        
+        // Проверяем размер при изменении размера окна
+        window.addEventListener('resize', checkScreenSize);
+        
+        // Check browser support for PDF.js
+        const useCanvas = typeof window.pdfjsLib !== 'undefined';
+        const loader = document.getElementById('loader');
+        const canvasContainer = document.getElementById('canvas-container');
+        const pdfEmbed = document.getElementById('pdf-embed');
+        const prevButton = document.getElementById('prev');
+        const nextButton = document.getElementById('next');
+        const pageNum = document.getElementById('page-num');
+        const pageCount = document.getElementById('page-count');
+        const zoomIn = document.getElementById('zoom-in');
+        const zoomOut = document.getElementById('zoom-out');
+        const zoomLevel = document.getElementById('zoom-level');
+        
+        // Переключатели режима просмотра - обычный и мобильный
+        const viewModeToggle = document.getElementById('view-mode-toggle');
+        const mobileViewModeToggle = document.getElementById('mobile-view-mode-toggle');
+        
+        // Mobile controls
+        const mobilePrev = document.getElementById('mobile-prev');
+        const mobileNext = document.getElementById('mobile-next');
+        const mobilePageInfo = document.getElementById('mobile-page-info');
+        const mobileViewToggle = document.querySelector('.mobile-view-toggle');
+        
+        let pdfDoc = null;
+        let currentPage = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let scale = 1.0;
+        let scrollMode = false; // режим непрерывного просмотра
+        
+        function showErrorMessage() {
+            loader.style.display = 'none';
+            pdfEmbed.style.display = 'block';
+        }
+        
+        function updateZoomLevel() {
+            zoomLevel.textContent = Math.round(scale * 100) + '%';
+        }
+        
+        try {
+            if (useCanvas) {
+                // PDF.js is available
+                // Set workerSrc property
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+                
+                // Load the PDF
+                const loadingTask = pdfjsLib.getDocument('{{ pdf_url }}');
+                
+                loadingTask.promise.then(function(pdfDocument) {
+                    pdfDoc = pdfDocument;
+                    pageCount.textContent = pdfDoc.numPages;
+                    
+                    renderPage(currentPage);
+                    loader.style.display = 'none';
+                    canvasContainer.style.display = 'block';
+                    
+                }).catch(function(reason) {
+                    console.error('Error during PDF loading:', reason);
+                    showErrorMessage();
+                });
+            } else {
+                // Fallback to embed
+                showErrorMessage();
+            }
+        } catch (error) {
+            console.error('Error initializing PDF viewer:', error);
+            showErrorMessage();
+        }
+        
+        // Рендеринг одной страницы в постраничном режиме
+        function renderPage(num) {
+            pageRendering = true;
+            
+            // Remove previous canvas if exists
+            while (canvasContainer.firstChild) {
+                canvasContainer.removeChild(canvasContainer.firstChild);
+            }
+            
+            if (scrollMode) {
+                // В режиме непрерывного просмотра рендерим все страницы
+                renderAllPages();
+                return;
+            }
+            
+            // Create a new canvas
+            const canvas = document.createElement('canvas');
+            canvasContainer.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+            
+            // Get the page
+            pdfDoc.getPage(num).then(function(page) {
+                // Set scale
+                const viewport = page.getViewport({scale: scale});
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                // Render PDF page into canvas context
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                
+                const renderTask = page.render(renderContext);
+                
+                // Wait for rendering to finish
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        // New page rendering is pending
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                }).catch(function(error) {
+                    console.error('Error rendering page:', error);
+                    pageRendering = false;
+                });
+            }).catch(function(error) {
+                console.error('Error getting page:', error);
+                pageRendering = false;
+            });
+            
+            // Update page counters - both desktop and mobile
+            pageNum.textContent = num;
+            mobilePageInfo.textContent = num + ' / ' + pdfDoc.numPages;
+            currentPage = num;
+        }
+        
+        // Рендеринг всех страниц в непрерывном режиме
+        function renderAllPages() {
+            pageRendering = true;
+            
+            // Скрываем навигацию, когда все страницы на одном экране
+            const navButtons = document.querySelectorAll('#prev, #next');
+            navButtons.forEach(btn => btn.style.display = 'none');
+            
+            // Скрываем весь блок счетчика страниц
+            document.querySelector('.page-counter').style.display = 'none';
+            
+            // Скрываем мобильные кнопки навигации
+            document.querySelector('.mobile-controls').style.display = 'none';
+            
+            // Очищаем контейнер перед добавлением всех страниц
+            while (canvasContainer.firstChild) {
+                canvasContainer.removeChild(canvasContainer.firstChild);
+            }
+            
+            // Рендеринг всех страниц
+            const totalPages = pdfDoc.numPages;
+            let renderedPages = 0;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const canvas = document.createElement('canvas');
+                canvas.className = 'pdf-page';
+                canvas.dataset.pageNumber = i;
+                canvasContainer.appendChild(canvas);
+                
+                // Добавляем небольшой отступ между страницами
+                if (i > 1) {
+                    const spacer = document.createElement('div');
+                    spacer.className = 'page-spacer';
+                    spacer.style.height = '20px';
+                    canvasContainer.insertBefore(spacer, canvas);
+                }
+                
+                // Рендеринг страницы
+                pdfDoc.getPage(i).then(function(page) {
+                    const viewport = page.getViewport({scale: scale});
+                    const ctx = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    const renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport
+                    };
+                    
+                    return page.render(renderContext).promise.then(function() {
+                        renderedPages++;
+                        if (renderedPages === totalPages) {
+                            pageRendering = false;
+                        }
+                    });
+                }).catch(function(error) {
+                    console.error('Error rendering page:', error);
+                });
+            }
+        }
+        
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+        
+        // Previous page
+        prevButton.addEventListener('click', function() {
+            if (pdfDoc === null || currentPage <= 1) return;
+            queueRenderPage(currentPage - 1);
+        });
+        
+        // Next page
+        nextButton.addEventListener('click', function() {
+            if (pdfDoc === null || currentPage >= pdfDoc.numPages) return;
+            queueRenderPage(currentPage + 1);
+        });
+        
+        // Zoom in
+        zoomIn.addEventListener('click', function() {
+            if (pdfDoc === null) return;
+            scale = Math.min(scale * 1.2, 3.0); // limit max zoom
+            updateZoomLevel();
+            queueRenderPage(currentPage);
+        });
+        
+        // Zoom out
+        zoomOut.addEventListener('click', function() {
+            if (pdfDoc === null) return;
+            scale = Math.max(scale / 1.2, 0.5); // limit min zoom
+            updateZoomLevel();
+            queueRenderPage(currentPage);
+        });
+        
+        // Initial zoom level
+        updateZoomLevel();
+        
+        // Функция переключения режима просмотра
+        function toggleViewMode(isScrollMode) {
+            scrollMode = isScrollMode;
+            
+            // Синхронизируем состояние обоих переключателей
+            viewModeToggle.checked = isScrollMode;
+            mobileViewModeToggle.checked = isScrollMode;
+            
+            if (scrollMode) {
+                // Непрерывный режим (все страницы сразу)
+                canvasContainer.style.display = 'block';
+                canvasContainer.style.overflowY = 'auto';
+                renderAllPages();
+                
+                // Добавляем класс для визуальной индикации активного режима
+                document.querySelector('.view-mode-container').classList.add('scroll-active');
+                mobileViewToggle.classList.add('scroll-active');
+            } else {
+                // Постраничный режим
+                // Восстанавливаем навигацию
+                const navButtons = document.querySelectorAll('#prev, #next');
+                navButtons.forEach(btn => btn.style.display = 'inline-flex');
+                
+                // Восстанавливаем весь блок счетчика страниц
+                document.querySelector('.page-counter').style.display = 'flex';
+                
+                // Восстанавливаем мобильные кнопки навигации только на мобильных устройствах
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.mobile-controls').style.display = 'flex';
+                } else {
+                    // На ПК скрываем мобильные элементы
+                    document.querySelector('.mobile-controls').style.display = 'none';
+                }
+                
+                // Удаляем класс активного режима
+                document.querySelector('.view-mode-container').classList.remove('scroll-active');
+                mobileViewToggle.classList.remove('scroll-active');
+                
+                // Рендерим текущую страницу
+                renderPage(currentPage);
+            }
+        }
+        
+        // Обработчик основного переключателя
+        viewModeToggle.addEventListener('change', function() {
+            toggleViewMode(this.checked);
+        });
+        
+        // Обработчик мобильного переключателя
+        mobileViewModeToggle.addEventListener('change', function() {
+            toggleViewMode(this.checked);
+        });
+        
+        // Добавляем стили для страниц в непрерывном режиме
+        const style = document.createElement('style');
+        style.textContent = `
+            .pdf-page {
+                display: block;
+                margin: 0 auto;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+                border-radius: 2px;
+            }
+            
+            .page-spacer {
+                display: block;
+                height: 20px;
+                background-color: transparent;
+            }
+            
+            #canvas-container {
+                text-align: center;
+                padding: 20px 0;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Mobile navigation handlers
+        mobilePrev.addEventListener('click', function() {
+            if (pdfDoc === null || currentPage <= 1) return;
+            queueRenderPage(currentPage - 1);
+        });
+        
+        mobileNext.addEventListener('click', function() {
+            if (pdfDoc === null || currentPage >= pdfDoc.numPages) return;
+            queueRenderPage(currentPage + 1);
+        });
+        
+        // Update mobile page info on load
+        loadingTask.promise.then(function() {
+            if (pdfDoc) {
+                mobilePageInfo.textContent = '1 / ' + pdfDoc.numPages;
+            }
+        });
+        
+        // Handle keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (pdfDoc === null) return;
+            
+            if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+                if (currentPage > 1) {
+                    queueRenderPage(currentPage - 1);
+                }
+                event.preventDefault();
+            } else if (event.key === 'ArrowRight' || event.key === 'PageDown') {
+                if (currentPage < pdfDoc.numPages) {
+                    queueRenderPage(currentPage + 1);
+                }
+                event.preventDefault();
+            }
+        });
+        
+        // Добавление обработки касаний для свайпа на мобильных устройствах
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            if (pdfDoc === null) return;
+            
+            const swipeThreshold = 50; // Минимальное расстояние для определения свайпа
+            
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // Свайп влево - следующая страница
+                if (currentPage < pdfDoc.numPages) {
+                    queueRenderPage(currentPage + 1);
+                }
+            }
+            
+            if (touchEndX > touchStartX + swipeThreshold) {
+                // Свайп вправо - предыдущая страница
+                if (currentPage > 1) {
+                    queueRenderPage(currentPage - 1);
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

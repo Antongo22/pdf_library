@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}PDF Library - Домашняя страница{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Онлайн библиотека PDF файлов</h1>
+    <p>Просматривайте ваши PDF документы онлайн с удобством на любом устройстве</p>
+    <a href="/pdf" class="btn-primary">Просмотреть PDF файлы</a>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <i class="fas fa-mobile-alt"></i>
+        <h3>Адаптивный дизайн</h3>
+        <p>Удобное отображение на мобильных устройствах и компьютерах</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-folder-open"></i>
+        <h3>Удобная организация</h3>
+        <p>Простой доступ к вашей библиотеке PDF документов</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-eye"></i>
+        <h3>Удобный просмотр</h3>
+        <p>Читайте PDF документы с комфортом прямо в браузере</p>
+    </div>
+</div>
+{% endblock %}

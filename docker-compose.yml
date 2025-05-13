@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    container_name: pdf-library
+    ports:
+      - "8321:8000"
+    volumes:
+      - ./app:/app/app
+      - ./pdf_uploads:/app/app/pdfs
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+
+volumes:
+  pdf_uploads:
+    driver: local
