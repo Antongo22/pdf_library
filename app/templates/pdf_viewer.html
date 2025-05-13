@@ -6,6 +6,29 @@
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/web/pdf_viewer.min.css">
 <style>
+    /* Улучшенный контейнер для canvas с поддержкой сенсорных жестов */
+    #canvas-container {
+        width: 100%;
+        height: auto;
+        max-height: 80vh;
+        overflow: auto;
+        position: relative;
+        touch-action: manipulation;
+        -webkit-overflow-scrolling: touch;
+        -webkit-tap-highlight-color: transparent;
+        background-color: var(--background-dark);
+        border-radius: 4px;
+        transition: transform 0.2s ease;
+    }
+    
+    /* Улучшения для элементов canvas внутри контейнера */
+    #canvas-container canvas {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        transition: transform 0.2s ease;
+    }
+    
     .pdf-viewer-container {
         background-color: var(--card-bg);
         border-radius: 8px;
@@ -567,25 +590,43 @@
             }
         }, { passive: false });
         
+        // Переменная для ограничения частоты обновления
+        let lastPinchTime = 0;
+        
         canvasContainer.addEventListener('touchmove', function(e) {
             if (isPinching && e.touches.length === 2) {
+                // Предотвращаем скролл и другие действия браузера
+                e.preventDefault();
+                
                 // Обработка pinch-жеста для масштабирования
                 const currentDistance = calculateDistance(e.touches[0], e.touches[1]);
                 const scaleFactor = currentDistance / initialPinchDistance;
-                const newScale = Math.min(Math.max(initialScale * scaleFactor, 0.5), 3.0);
                 
-                if (Math.abs(newScale - scale) > 0.01) {
-                    scale = newScale;
-                    updateZoomLevel();
-                    if (!scrollMode) {
-                        // В постраничном режиме перерисовываем текущую страницу
-                        renderPage(currentPage);
-                    } else {
-                        // В непрерывном режиме перерисовываем все страницы
-                        renderAllPages();
+                // Более плавное изменение масштаба
+                const newScale = Math.min(Math.max(initialScale * scaleFactor, 0.25), 4.0);
+                
+                // Уменьшаем порог для более плавного масштабирования
+                if (Math.abs(newScale - scale) > 0.001) {
+                    const now = Date.now();
+                    
+                    // Проверяем, прошло ли достаточно времени с последнего обновления
+                    // это позволяет избежать слишком частых обновлений, но при этом сохранить плавность
+                    if (now - lastPinchTime > 16) { // 60fps = ~16ms между кадрами
+                        lastPinchTime = now;
+                        
+                        // Плавно обновляем масштаб с интерполяцией
+                        scale = scale + (newScale - scale) * 0.7; // Интерполяция для плавности
+                        updateZoomLevel();
+                        
+                        if (!scrollMode) {
+                            // В постраничном режиме перерисовываем текущую страницу
+                            renderPage(currentPage);
+                        } else {
+                            // В непрерывном режиме перерисовываем все страницы
+                            renderAllPages();
+                        }
                     }
                 }
-                e.preventDefault();
             }
         }, { passive: false });
         
