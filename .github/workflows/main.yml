@@ -39,11 +39,10 @@ jobs:
           Сервер: ${{ secrets.SSH_HOST }}
           Запустил: ${{ github.actor }}
 
-          Посмотреть: http://bunker.trexon.ru
-          Админ панель: http://bunker.trexon.ru/admin/panel
+          Посмотреть: http://library.trexon.ru
           
           Действия на сервере:
-          1. git pull в ~/Desktop/bunker
+          1. git pull в ~/Desktop/library
           2. docker-compose down
           3. docker-compose up --build -d
           Для просмотра логов: docker-compose logs -f
