@@ -10,13 +10,28 @@
     #canvas-container {
         width: 100%;
         height: 80vh;
-        overflow: auto !important; /* Только здесь должен быть скролл */
+        overflow: auto; /* Разрешаем скролл по необходимости */
         position: relative;
-        touch-action: manipulation; /* Позволяет любые жесты без ограничений */
         -webkit-overflow-scrolling: touch;
         -webkit-tap-highlight-color: transparent;
         background-color: var(--background-dark);
         border-radius: 4px;
+        touch-action: pan-y pan-x !important;
+    }
+    
+    /* Стиль canvas для поддержки прокрутки */
+    #canvas-container canvas {
+        display: block;
+        margin: 0 auto;
+        user-select: none; /* Предотвращаем выделение */
+    }
+    
+    /* Настройки для мобильного скролла */
+    .mobile-scrollable {
+        -webkit-overflow-scrolling: touch !important;
+        overflow-y: scroll !important;
+        overflow-x: scroll !important;
+        touch-action: pan-y pan-x !important;
     }
     
     /* Ограничиваем скролл в контейнерах PDF-просмотрщика */
@@ -697,6 +712,86 @@
                 renderAllPages();
             }
         });
+        
+        // Проверяем, является ли устройство мобильным
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // Супер-радикальный подход для прокрутки одним пальцем
+            let isDragging = false;
+            let startY = 0;
+            let startX = 0;
+            let scrollTop = 0;
+            let scrollLeft = 0;
+            
+            // Когда PDF загрузится, добавим обработчики для скролла
+            setTimeout(function() {
+                // Функция ручного скролла - самое ядро
+                function manualScroll(element, delta) {
+                    element.scrollBy({
+                        top: delta * -1.5, // Усиленное значение для лучшего отклика
+                        behavior: 'auto'
+                    });
+                }
+                
+                // Создаем див поверх контейнера PDF, который будет перехватывать все тач-события
+                const overlay = document.createElement('div');
+                overlay.style.position = 'absolute';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.zIndex = '999';
+                overlay.style.backgroundColor = 'transparent';
+                overlay.style.pointerEvents = 'auto';
+                canvasContainer.style.position = 'relative'; // Убедитесь, что контейнер имеет relative позиционирование
+                canvasContainer.appendChild(overlay);
+                
+                // Обработчики для одиночного пальца
+                overlay.addEventListener('touchstart', function(e) {
+                    if (e.touches.length === 1) {
+                        isDragging = true;
+                        startY = e.touches[0].clientY;
+                        startX = e.touches[0].clientX;
+                        scrollTop = canvasContainer.scrollTop;
+                        scrollLeft = canvasContainer.scrollLeft;
+                        e.preventDefault(); // Предотвращаем стандартное поведение
+                    }
+                }, { passive: false });
+                
+                overlay.addEventListener('touchmove', function(e) {
+                    if (isDragging && e.touches.length === 1) {
+                        const touchY = e.touches[0].clientY;
+                        const touchX = e.touches[0].clientX;
+                        const deltaY = startY - touchY;
+                        const deltaX = startX - touchX;
+                        
+                        // Изменяем позицию скролла
+                        canvasContainer.scrollTop = scrollTop + deltaY;
+                        canvasContainer.scrollLeft = scrollLeft + deltaX;
+                        
+                        // Обновляем начальные координаты для плавного движения
+                        startY = touchY;
+                        startX = touchX;
+                        scrollTop = canvasContainer.scrollTop;
+                        scrollLeft = canvasContainer.scrollLeft;
+                        
+                        e.preventDefault(); // Предотвращаем стандартное поведение
+                    }
+                }, { passive: false });
+                
+                overlay.addEventListener('touchend', function() {
+                    isDragging = false;
+                });
+                
+                // Дополнительно - передаем колёсико мыши на мобильных устройствах
+                overlay.addEventListener('wheel', function(e) {
+                    manualScroll(canvasContainer, e.deltaY);
+                    e.preventDefault();
+                }, { passive: false });
+                
+            }, 1000); // Даем время на загрузку PDF
+        }
         
         try {
             if (useCanvas) {
