@@ -63,6 +63,7 @@ button, .btn-primary, .btn-view, .btn-download, .pdf-btn {
 
 button:hover, .btn-primary:hover, .btn-view:hover, .btn-download:hover, .pdf-btn:hover {
     background-color: var(--primary-dark);
+    color: var(--text-light);
 }
 
 /* Header styles */
