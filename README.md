@@ -68,3 +68,4 @@ library/
 
 - Личный сайт: [aleynichenko.ru](https://aleynichenko.ru/)
 - Главный сайт: [trexon.ru](http://trexon.ru/)
+- Сайт проекта: [library.trexon.ru](http://library.trexon.ru)
