@@ -34,4 +34,4 @@ async def about(request: Request):
 if __name__ == "__main__":
     # Запускаем с настройками для HTTPS
     # Сертификаты должны быть настроены на уровне сервера
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8321, reload=True)

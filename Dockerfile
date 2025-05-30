@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Открытие порта
-EXPOSE 8000
+EXPOSE 8321
 
 # Команда для запуска приложения с HTTPS
 CMD ["python", "-m", "app.main"]
