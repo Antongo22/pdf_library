@@ -4,11 +4,15 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from pathlib import Path
 
 from app.routers import pdfs
 
 app = FastAPI(title="PDF Library", description="Online PDF reader application")
+
+# Add HTTPS redirect middleware
+app.add_middleware(HTTPSRedirectMiddleware)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -28,4 +32,6 @@ async def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 if __name__ == "__main__":
+    # Запускаем с настройками для HTTPS
+    # Сертификаты должны быть настроены на уровне сервера
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

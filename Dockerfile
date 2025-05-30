@@ -1,16 +1,22 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bullseye
+
+# Устанавливаем более безопасные настройки
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install dependencies
+# Установка зависимостей
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Копирование кода приложения
 COPY . .
 
-# Expose port
+# Открытие порта
 EXPOSE 8000
 
-# Command to run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Команда для запуска приложения с HTTPS
+CMD ["python", "-m", "app.main"]
