@@ -10,8 +10,8 @@ from app.routers import pdfs
 
 app = FastAPI(title="PDF Library", description="Online PDF reader application")
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+# Mount static files с HTML заголовками для поддержки HTTPS
+app.mount("/static", StaticFiles(directory="app/static", html=True), name="static")
 
 # Templates
 templates = Jinja2Templates(directory="app/templates")
