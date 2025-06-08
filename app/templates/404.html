@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Страница не найдена{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-icon">📚</div>
+    <h1 class="error-title">Опаньки! Книга потерялась...</h1>
+    <p class="error-message">Возможно, она спряталась между страниц или её взял почитать библиотечный призрак.</p>
+    
+    <div class="error-animation">
+        <div class="book-search">
+            <div class="book-icon">📕</div>
+            <div class="book-icon">📗</div>
+            <div class="book-icon">📘</div>
+            <div class="magnifier">🔍</div>
+        </div>
+    </div>
+    
+    <div class="error-quotes">
+        <p><em>"404 оттенка PDF — страница отсутствует, но библиотекарь всё ещё краснеет от смущения!"</em></p>
+    </div>
+    
+    <a href="/" class="back-button">Вернуться на главную</a>
+</div>
+
+<style>
+    .error-container {
+        text-align: center;
+        padding: 50px 20px;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Roboto', sans-serif;
+        color: var(--text-color);
+    }
+    
+    .error-code {
+        font-size: 120px;
+        font-weight: 900;
+        margin-bottom: 0;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .error-icon {
+        font-size: 72px;
+        margin: 20px 0;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .error-title {
+        font-size: 36px;
+        margin: 10px 0 20px;
+        color: var(--primary-color);
+    }
+    
+    .error-message {
+        font-size: 20px;
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+    
+    .error-animation {
+        margin: 50px 0;
+        height: 100px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .book-search {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    
+    .book-icon {
+        font-size: 42px;
+        margin: 0 10px;
+        transform-origin: bottom center;
+        animation: bookWobble 2s ease-in-out infinite;
+    }
+    
+    .book-icon:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+    
+    .book-icon:nth-child(3) {
+        animation-delay: 0.8s;
+    }
+    
+    .magnifier {
+        font-size: 36px;
+        position: absolute;
+        right: 30%;
+        animation: searchMove 4s ease-in-out infinite;
+    }
+    
+    .error-quotes {
+        font-size: 18px;
+        font-style: italic;
+        margin: 20px 0 40px;
+        padding: 15px;
+        border-left: 5px solid var(--primary-color);
+        background-color: rgba(0,0,0,0.05);
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 12px 30px;
+        background: var(--gradient-primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 18px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        margin-top: 30px;
+    }
+    
+    .back-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 25px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Анимации */
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    @keyframes bookWobble {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(8deg); }
+        75% { transform: rotate(-8deg); }
+        100% { transform: rotate(0deg); }
+    }
+    
+    @keyframes searchMove {
+        0% { transform: translateX(0) rotate(0deg); }
+        25% { transform: translateX(-100px) rotate(-20deg); }
+        50% { transform: translateX(100px) rotate(20deg); }
+        75% { transform: translateX(-50px) rotate(-10deg); }
+        100% { transform: translateX(0) rotate(0deg); }
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .error-code {
+            font-size: 80px;
+        }
+        
+        .error-title {
+            font-size: 24px;
+        }
+        
+        .error-message {
+            font-size: 16px;
+        }
+    }
+</style>
+{% endblock %}
