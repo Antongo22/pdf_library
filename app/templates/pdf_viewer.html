@@ -73,6 +73,28 @@
         margin-bottom: 20px;
     }
     
+    .back-button {
+        margin-bottom: 10px;
+    }
+    
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 15px;
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-back:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    
     .pdf-header h1 {
         font-size: 1.8rem;
         color: var(--primary-color);
@@ -144,6 +166,11 @@
             font-size: 1.5rem;
             text-align: center;
             margin-bottom: 10px;
+        }
+        
+        .back-button {
+            text-align: center;
+            margin-bottom: 15px;
         }
     }
     
@@ -470,6 +497,9 @@
 {% block content %}
 <div class="pdf-viewer-container">
     <div class="pdf-header">
+        <div class="back-button">
+            <a href="{{ back_url }}" class="btn-back"><i class="fas fa-arrow-left"></i> Назад</a>
+        </div>
         <h1>{{ pdf_name }}</h1>
         <div class="pdf-controls">
             <button id="prev" class="pdf-btn"><i class="fas fa-chevron-left"></i> Предыдущая</button>
