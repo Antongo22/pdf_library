@@ -91,9 +91,12 @@ def get_pdf_files(directory: str) -> list[dict]:
         if os.path.isfile(file_path) and (file.lower().endswith('.pdf') or file.lower().endswith('.md')):
             # Определяем тип файла для иконки
             file_type = 'pdf' if file.lower().endswith('.pdf') else 'markdown'
+            # Используем полный путь для корректного URL-кодирования
+            rel_path = os.path.relpath(file_path, base_dir).replace('\\', '/')
             files.append({
                 'name': file,
-                'path': os.path.relpath(file_path, base_dir).replace('\\', '/'),
+                'path': rel_path,
+                'encoded_path': rel_path,  # Добавляем полный путь для URL
                 'type': file_type
             })
     return sorted(files, key=lambda x: x['name'].lower())
@@ -204,8 +207,20 @@ async def view_pdf(request: Request, file_path: str):
         if file_name.lower().endswith('.md'):
             # Читаем содержимое Markdown файла
             try:
-                with open(file_path_full, 'r', encoding='utf-8') as file:
-                    content = file.read()
+                # Пробуем разные кодировки для чтения файла
+                encodings = ['utf-8', 'cp1251', 'latin-1']
+                content = None
+                
+                for encoding in encodings:
+                    try:
+                        with open(file_path_full, 'r', encoding=encoding) as file:
+                            content = file.read()
+                        break  # Если успешно прочитали, выходим из цикла
+                    except UnicodeDecodeError:
+                        continue
+                
+                if content is None:
+                    raise ValueError(f"Не удалось прочитать файл ни с одной из кодировок: {encodings}")
                 
                 # Импортируем markdown при необходимости
                 try:

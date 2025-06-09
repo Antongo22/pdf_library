@@ -58,17 +58,17 @@
                     <h3>{{ file.name }}</h3>
                     <div class="pdf-actions">
                         {% if file.type == 'pdf' %}
-                            <a href="/pdf/view/{{ file.path }}" class="btn-action">
+                            <a href="/pdf/view/{{ file.path | urlencode }}" class="btn-action">
                                 <i class="fas fa-eye"></i> Просмотреть
                             </a>
-                            <a href="/pdf/download/{{ file.path }}" class="btn-action">
+                            <a href="/pdf/download/{{ file.path | urlencode }}" class="btn-action">
                                 <i class="fas fa-download"></i> Скачать
                             </a>
                         {% elif file.type == 'markdown' %}
-                            <a href="/pdf/view/{{ file.path }}" class="btn-action">
+                            <a href="/pdf/view/{{ file.path | urlencode }}" class="btn-action">
                                 <i class="fas fa-eye"></i> Просмотреть
                             </a>
-                            <a href="/pdf/download/{{ file.path }}" class="btn-action">
+                            <a href="/pdf/download/{{ file.path | urlencode }}" class="btn-action">
                                 <i class="fas fa-download"></i> Скачать
                             </a>
                         {% endif %}
