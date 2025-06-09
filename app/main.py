@@ -1,21 +1,31 @@
 import os
 import uvicorn
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pathlib import Path
 
 from app.routers import pdfs
 
-app = FastAPI(title="Knowledge Library", description="Библиотека знаний - Просмотр документов в разных форматах")
+is_docker = os.environ.get('RUNNING_IN_DOCKER', 'false').lower() == 'true'
 
-# Mount static files с HTML заголовками для поддержки HTTPS
+if is_docker:
+    app = FastAPI(
+        title="Knowledge Library",
+        description="Библиотека знаний - Просмотр документов в разных форматах",
+        docs_url=None,
+        redoc_url=None
+    )
+else:
+    app = FastAPI(
+        title="Knowledge Library",
+        description="Библиотека знаний - Просмотр документов в разных форматах"
+    )
+
 app.mount("/static", StaticFiles(directory="app/static", html=True), name="static")
 
-# Templates
 templates = Jinja2Templates(directory="app/templates")
 
 # Обработчики ошибок
@@ -34,7 +44,6 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code
     )
 
-# Include routers
 app.include_router(pdfs.router)
 
 @app.get("/", response_class=HTMLResponse)
@@ -46,6 +55,4 @@ async def about(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 if __name__ == "__main__":
-    # Запускаем с настройками для HTTPS
-    # Сертификаты должны быть настроены на уровне сервера
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

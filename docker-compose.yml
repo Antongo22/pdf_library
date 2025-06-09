@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
     environment:
       - TZ=Europe/Moscow
+      - RUNNING_IN_DOCKER=true
 
 volumes:
   pdf_uploads:
