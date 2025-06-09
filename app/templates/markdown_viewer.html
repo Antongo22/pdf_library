@@ -89,6 +89,9 @@
         line-height: 1.6;
         color: var(--text-color);
         font-family: 'Roboto', sans-serif;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
     }
     
     /* Стили для элементов Markdown */
@@ -101,6 +104,9 @@
         color: var(--primary-color);
         margin-top: 1.5em;
         margin-bottom: 0.5em;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
     }
     
     .markdown-content h1 {
@@ -125,6 +131,9 @@
     
     .markdown-content p {
         margin: 1em 0;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
     }
     
     .markdown-content a {
@@ -145,6 +154,7 @@
         position: relative;
         border-left: 4px solid var(--primary-color);
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        white-space: pre-wrap; /* Разрешаем перенос строк в пре-форматированном тексте */
     }
     
     /* Стиль для метки языка */
@@ -160,11 +170,17 @@
         opacity: 0.8;
     }
     
-    .markdown-content code {
-        font-family: 'Courier New', Courier, monospace;
-        background-color: rgba(0, 0, 0, 0.05);
+    .markdown-content code:not([class*="language-"]) {
+        background-color: rgba(0, 0, 0, 0.1);
         padding: 2px 4px;
         border-radius: 3px;
+        font-family: monospace;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-all; /* Разрывать в любом месте для предотвращения горизонтального скрола */
+        display: inline-block; /* Чтобы блок кода мог переноситься на новую строку */
+        max-width: 100%; /* Ограничиваем ширину контейнера */
     }
     
     .markdown-content pre code {
@@ -177,6 +193,9 @@
         padding: 0.5em 1em;
         border-left: 4px solid var(--primary-color);
         background-color: rgba(0, 0, 0, 0.03);
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
     }
     
     .markdown-content ul, 
