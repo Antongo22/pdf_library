@@ -1,29 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}PDF Library - Домашняя страница{% endblock %}
+{% block title %}Библиотека знаний - Домашняя страница{% endblock %}
 
 {% block content %}
 <div class="hero">
-    <h1>Онлайн библиотека PDF файлов</h1>
-    <p>Просматривайте ваши PDF документы онлайн с удобством на любом устройстве</p>
-    <a href="/pdf" class="btn-primary">Просмотреть PDF файлы</a>
+    <h1>Библиотека знаний</h1>
+    <p>Все ваши документы и знания в одном месте</p>
+    <div class="hero-buttons">
+        <a href="/pdf/" class="btn-primary"><i class="fas fa-book"></i> Просмотреть библиотеку</a>
+    </div>
 </div>
 
 <div class="features">
     <div class="feature-card">
-        <i class="fas fa-mobile-alt"></i>
-        <h3>Адаптивный дизайн</h3>
-        <p>Удобное отображение на мобильных устройствах и компьютерах</p>
+        <div class="feature-icon document-icon">
+            <i class="fas fa-book"></i>
+        </div>
+        <h2>Удобная навигация</h2>
+        <p>Навигация по папкам, хлебные крошки и поиск по названию помогут быстро найти нужные документы в вашей библиотеке.</p>
     </div>
+    
     <div class="feature-card">
-        <i class="fas fa-folder-open"></i>
-        <h3>Удобная организация</h3>
-        <p>Простой доступ к библиотеке PDF документов</p>
+        <div class="feature-icon file-icon">
+            <i class="fas fa-file"></i>
+        </div>
+        <h2>Разные форматы</h2>
+        <p>Просматривайте документы в форматах PDF и Markdown с полной поддержкой форматирования. Без необходимости скачивания.</p>
     </div>
+    
     <div class="feature-card">
-        <i class="fas fa-eye"></i>
-        <h3>Удобный просмотр</h3>
-        <p>Читайте PDF документы с комфортом прямо в браузере</p>
+        <div class="feature-icon">
+            <i class="fas fa-mobile-alt"></i>
+        </div>
+        <h2>Адаптивный дизайн</h2>
+        <p>Удобное отображение на мобильных устройствах и компьютерах. Мгновенный доступ к документам с любого устройства.</p>
     </div>
 </div>
 {% endblock %}

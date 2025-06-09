@@ -3,14 +3,14 @@ import uvicorn
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pathlib import Path
 
 from app.routers import pdfs
 
-app = FastAPI(title="PDF Library", description="Online PDF reader application")
+app = FastAPI(title="Knowledge Library", description="Библиотека знаний - Просмотр документов в разных форматах")
 
 # Mount static files с HTML заголовками для поддержки HTTPS
 app.mount("/static", StaticFiles(directory="app/static", html=True), name="static")
@@ -39,7 +39,7 @@ app.include_router(pdfs.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {"request": request, "has_markdown": True})
 
 @app.get("/about", response_class=HTMLResponse)
 async def about(request: Request):
