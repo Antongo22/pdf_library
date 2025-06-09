@@ -32,19 +32,16 @@
 <div class="pdf-list">
     {% if directories|length > 0 or files|length > 0 %}
         {% for directory in directories %}
+        <a href="{{ directory.path }}" class="folder-link">
             <div class="pdf-card folder-card">
                 <div class="pdf-icon">
                     <i class="fas fa-folder"></i>
                 </div>
                 <div class="pdf-info">
                     <h3>{{ directory.name }}</h3>
-                    <div class="pdf-actions">
-                        <a href="{{ directory.path }}" class="btn-folder">
-                            <i class="fas fa-folder-open"></i> Открыть
-                        </a>
-                    </div>
                 </div>
             </div>
+        </a>
         {% endfor %}
         {% for file in files %}
             <div class="pdf-card">
