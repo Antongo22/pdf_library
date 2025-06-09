@@ -225,7 +225,24 @@ async def view_pdf(request: Request, file_path: str):
                 # Импортируем markdown при необходимости
                 try:
                     import markdown
-                    html_content = markdown.markdown(content, extensions=['tables', 'fenced_code'])
+                    from markdown.extensions import codehilite, fenced_code, tables
+                    
+                    # Конфигурируем расширения без проблемных параметров
+                    # Используем только префикс языка, остальные параметры не применяем
+                    fenced_code_ext = fenced_code.FencedCodeExtension(lang_prefix='language-')
+                    tables_ext = tables.TableExtension()
+                    
+                    # Преобразуем Markdown в HTML с сохранением информации о языке программирования
+                    # Заменяем форматирование блоков кода для лучшей интеграции с highlight.js
+                    html_content = markdown.markdown(
+                        content, 
+                        extensions=[fenced_code_ext, tables_ext, 'toc', 'nl2br']
+                    )
+                    
+                    # Дополнительная обработка для Dockerfile и других специальных языков
+                    import re
+                    # Заменить dockerfile на language-dockerfile для корректной подсветки
+                    html_content = re.sub(r'<code class=[\'"]dockerfile[\'"]>', '<code class="language-dockerfile">', html_content)
                 except ImportError:
                     # Если модуль не установлен, используем простой текстовый вывод
                     html_content = f"<pre>{content}</pre>"
