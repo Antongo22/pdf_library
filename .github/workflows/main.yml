@@ -12,19 +12,58 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: SSH and deploy
+    - name: SSH - Prepare and Pull Code
       uses: appleboy/ssh-action@v1.0.0
-      id: deploy
+      id: prepare
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         port: 8542
+        command_timeout: 20m
         script: |
-          cd ~/Desktop/library
+          echo "== [1] Перехожу в директорию проекта =="
+          cd ~/Desktop/library || exit 1
+
+          echo "== [2] Проверка и сброс локальных изменений =="
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "→ Обнаружены изменения, сбрасываю..."
+            git reset --hard HEAD
+            git clean -fd
+          fi
+
+          echo "== [3] Обновление кода из репозитория =="
           git pull
+
+    - name: SSH - Stop Previous Containers
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: 8542
+        command_timeout: 10m
+        script: |
+          echo "== [4] Останавливаю старые контейнеры =="
+          cd ~/Desktop/library || exit 1
           docker-compose down
-          docker-compose up --build -d
+
+    - name: SSH - Build and Start
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: 8542
+        command_timeout: 20m
+        script: |
+          echo "== [5] Собираю и запускаю контейнеры =="
+          cd ~/Desktop/library || exit 1
+          docker-compose build
+          docker-compose up -d
+
+          echo "== [6] Последние 100 строк логов =="
+          docker-compose logs --tail=100
 
     - name: Send Telegram notification (Success)
       if: success()
@@ -39,13 +78,9 @@ jobs:
           Сервер: ${{ secrets.SSH_HOST }}
           Запустил: ${{ github.actor }}
 
-          Посмотреть: http://library.trexon.ru
-          
-          Действия на сервере:
-          1. git pull в ~/Desktop/library
-          2. docker-compose down
-          3. docker-compose up --build -d
-          Для просмотра логов: docker-compose logs -f
+          🔗 http://5.129.199.10:8777/docs
+
+          Для логов: `docker-compose logs -f`
 
     - name: Send Telegram notification (Failure)
       if: failure()
@@ -57,5 +92,5 @@ jobs:
           ❌ Деплой упал!
           Репозиторий: ${{ github.repository }}
           Ветка: ${{ github.ref }}
-          Ошибка в шаге: ${{ steps.deploy.outcome }}
+          Ошибка в шаге: ${{ steps.prepare.outcome }}
           Подробнее: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
