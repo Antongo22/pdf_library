@@ -276,6 +276,9 @@
         
         // Подсвечиваем все блоки кода
         document.querySelectorAll('pre code').forEach((block) => {
+            // Добавляем пустые строки в начало блока кода
+            block.innerHTML = '\n' + block.innerHTML;
+            
             // Применяем подсветку синтаксиса
             hljs.highlightElement(block);
             
