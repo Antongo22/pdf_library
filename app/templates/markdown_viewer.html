@@ -146,15 +146,15 @@
     }
     
     .markdown-content pre {
-        background-color: var(--card-bg);
+        background-color: #282c34; /* Унифицированный цвет фона всех блоков кода */
         border-radius: 4px;
         padding: 16px;
-        overflow: auto;
+        overflow-x: auto; /* Горизонтальный скролл */
         margin: 16px 0;
         position: relative;
         border-left: 4px solid var(--primary-color);
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        white-space: pre-wrap; /* Разрешаем перенос строк в пре-форматированном тексте */
+        white-space: pre; /* Отменяем перенос строк */
     }
     
     /* Стиль для метки языка */
@@ -278,11 +278,6 @@
         document.querySelectorAll('pre code').forEach((block) => {
             // Применяем подсветку синтаксиса
             hljs.highlightElement(block);
-            
-            // Обрабатываем специальные случаи для Dockerfile
-            if (block.className.includes('language-dockerfile')) {
-                block.parentElement.style.backgroundColor = 'rgba(35, 35, 50, 0.95)';
-            }
             
             // Добавляем метку языка, если он определен
             let language = block.className.match(/language-(\w+)/)?.[1];
