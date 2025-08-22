@@ -131,20 +131,20 @@ async def list_markdown_files(
 
 @router.get("/view/{file_path:path}", response_class=HTMLResponse)
 async def view_markdown(request: Request, file_path: str):
-    """Просмотр Markdown файла"""
-    base_dir = get_markdown_dir()
+    """Просмотр Markdown файлов"""
+    print(f"MARKDOWN DEBUG: Accessing file_path = {file_path}")
     
     try:
-        # Преобразуем путь к файлу в объект Path и убедимся, что он находится внутри базовой директории
-        full_path = (base_dir / file_path).resolve()
+        # Базовая директория для PDF файлов
+        base_dir = Path("pdf_uploads")
+        full_path = base_dir / file_path
         
-        # Проверяем, что файл существует и находится внутри базовой директории
-        if not full_path.exists() or not str(full_path).startswith(str(base_dir)):
-            raise HTTPException(status_code=404, detail="File not found")
+        print(f"MARKDOWN DEBUG: full_path = {full_path}")
+        print(f"MARKDOWN DEBUG: full_path.parent = {full_path.parent}")
         
-        # Проверяем, что это Markdown файл
-        if not full_path.suffix.lower() in ['.md', '.markdown']:
-            raise HTTPException(status_code=400, detail="Not a Markdown file")
+        # Проверяем, что файл существует и имеет расширение .md
+        if not full_path.exists() or not full_path.suffix.lower() == '.md':
+            raise HTTPException(status_code=404, detail="Markdown файл не найден")
         
         # Читаем содержимое файла
         with open(full_path, 'r', encoding='utf-8') as f:
@@ -158,7 +158,11 @@ async def view_markdown(request: Request, file_path: str):
         
         # Получаем относительный путь к директории для кнопки "Назад"
         parent_folder = str(full_path.parent.relative_to(base_dir)).replace("\\", "/")
-        back_url = f"/markdown/?folder={parent_folder}" if parent_folder != "." else "/markdown/"
+        print(f"MARKDOWN DEBUG: parent_folder = '{parent_folder}'")
+        
+        # Формируем URL для кнопки "Назад"
+        back_url = f"/pdf/?folder={parent_folder}" if parent_folder and parent_folder != "." else "/pdf/"
+        print(f"MARKDOWN DEBUG: back_url = '{back_url}'")
         
         return templates.TemplateResponse(
             "markdown_viewer.html", 

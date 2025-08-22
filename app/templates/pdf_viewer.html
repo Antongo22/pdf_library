@@ -36,6 +36,7 @@
         overflow: auto;
         -webkit-overflow-scrolling: touch;
         position: relative;
+        margin-bottom: 40px;
     }
     
     #canvas-container {
@@ -93,6 +94,7 @@
     .btn-back:hover {
         opacity: 0.9;
         transform: translateY(-2px);
+        text-decoration: none;
     }
     
     .pdf-header h1 {
@@ -497,11 +499,8 @@
 {% block content %}
 <div class="pdf-viewer-container">
     <div class="pdf-header">
-        <div class="back-button">
-            <a href="{{ back_url }}" class="btn-back"><i class="fas fa-arrow-left"></i> Назад</a>
-        </div>
-        <h1>{{ pdf_name }}</h1>
         <div class="pdf-controls">
+            <a href="{{ back_url }}" class="btn-back pdf-btn"><i class="fas fa-arrow-left"></i> Назад</a>
             <button id="prev" class="pdf-btn"><i class="fas fa-chevron-left"></i> Предыдущая</button>
             <div class="page-counter">
                 <span id="page-num">1</span> <span class="page-separator">/</span> <span id="page-count">0</span>
@@ -969,6 +968,10 @@ document.addEventListener('DOMContentLoaded', function() {
             renderAllPages();
             document.querySelector('.view-mode-container').classList.add('scroll-active');
             mobileViewToggle.classList.add('scroll-active');
+            // Скрыть мобильные кнопки навигации в режиме чтения целиком
+            if (window.innerWidth <= 768) {
+                document.querySelector('.mobile-controls').style.display = 'none';
+            }
         } else {
             const navButtons = document.querySelectorAll('#prev, #next');
             navButtons.forEach(btn => btn.style.display = 'inline-flex');

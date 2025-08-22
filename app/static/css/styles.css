@@ -430,9 +430,11 @@ footer {
 .pdf-controls {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 10px;
     margin-bottom: 20px;
+    width: 100%;
+    overflow-x: auto;
 }
 
 .pdf-btn {
@@ -451,6 +453,7 @@ footer {
     border-radius: 4px;
     padding: 20px;
     overflow-x: auto;
+    margin-bottom: 40px;
 }
 
 #pdf-render {
@@ -619,9 +622,6 @@ footer {
         font-size: 2rem;
     }
     
-    .pdf-controls {
-        justify-content: center;
-    }
     
     .pdf-download {
         margin-left: 0;

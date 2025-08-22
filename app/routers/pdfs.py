@@ -192,6 +192,14 @@ async def view_pdf(request: Request, file_path: str):
         file_name = file_parts.name
         folder = str(file_parts.parent) if str(file_parts.parent) != "." else None
         
+        # Нормализуем путь к папке для URL (заменяем \ на /)
+        if folder:
+            folder = folder.replace("\\", "/")
+        
+        print(f"PDF DEBUG: file_path = {file_path}")
+        print(f"PDF DEBUG: file_parts.parent = {file_parts.parent}")
+        print(f"PDF DEBUG: folder = '{folder}'")
+        
         # Получаем полный путь к файлу
         base_dir = get_subfolder_path(folder)
         file_path_full = base_dir / file_name
@@ -202,6 +210,8 @@ async def view_pdf(request: Request, file_path: str):
         # Формируем URL для загрузки
         download_url = f"/pdf/download/{file_path}"
         back_url = f"/pdf/?folder={folder}" if folder else "/pdf/"
+        
+        print(f"PDF DEBUG: back_url = '{back_url}'")
         
         # В зависимости от типа файла выбираем шаблон
         if file_name.lower().endswith('.md'):

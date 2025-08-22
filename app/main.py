@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pathlib import Path
 
-from app.routers import pdfs
+from app.routers import pdfs, markdown
 
 is_docker = os.environ.get('RUNNING_IN_DOCKER', 'false').lower() == 'true'
 
@@ -45,6 +45,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
     )
 
 app.include_router(pdfs.router)
+app.include_router(markdown.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -56,3 +57,4 @@ async def about(request: Request):
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
