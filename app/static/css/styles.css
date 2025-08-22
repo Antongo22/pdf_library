@@ -566,6 +566,113 @@ footer {
     color: var(--text-muted);
 }
 
+/* Markdown content styles */
+.markdown-content {
+    line-height: 1.7;
+    color: var(--text-light);
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+    color: var(--primary-color);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.markdown-content h1 { font-size: 2rem; }
+.markdown-content h2 { font-size: 1.75rem; }
+.markdown-content h3 { font-size: 1.5rem; }
+.markdown-content h4 { font-size: 1.25rem; }
+
+.markdown-content p {
+    margin-bottom: 1rem;
+}
+
+.markdown-content ul, .markdown-content ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
+
+.markdown-content li {
+    margin-bottom: 0.5rem;
+}
+
+.markdown-content blockquote {
+    border-left: 4px solid var(--primary-color);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Code blocks */
+.markdown-content pre {
+    background-color: var(--background-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 0.9rem;
+}
+
+.markdown-content code {
+    background-color: var(--background-dark);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 0.9rem;
+}
+
+.markdown-content pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+/* Table styles with horizontal scroll */
+.markdown-content .table-wrapper {
+    overflow-x: auto;
+    margin: 1rem 0;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.markdown-content table {
+    width: 100%;
+    min-width: 1200px; /* Значительно увеличиваем минимальную ширину таблицы */
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    font-size: 0.9rem;
+}
+
+.markdown-content table th,
+.markdown-content table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap; /* Предотвращаем перенос текста */
+}
+
+.markdown-content table th {
+    background-color: var(--background-light);
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.markdown-content table tr:hover {
+    background-color: rgba(255, 107, 0, 0.05);
+}
+
+.markdown-content table tr:last-child td {
+    border-bottom: none;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
     .mobile-menu-btn {
@@ -633,5 +740,21 @@ footer {
     
     .author-info, .app-features {
         padding: 20px;
+    }
+    
+    /* Мобильные стили для таблиц */
+    .markdown-content table {
+        min-width: 800px; /* Увеличиваем и для мобильных */
+        font-size: 0.8rem;
+    }
+    
+    .markdown-content table th,
+    .markdown-content table td {
+        padding: 8px 12px; /* Уменьшаем отступы */
+    }
+    
+    .markdown-content .table-wrapper {
+        /* Скролл появляется раньше на мобильных */
+        -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
     }
 }
