@@ -78,7 +78,7 @@ jobs:
           Сервер: ${{ secrets.SSH_HOST }}
           Запустил: ${{ github.actor }}
 
-          🔗 http://5.129.199.10:8777/docs
+          🔗 https://library.trexon.ru
 
           Для логов: `docker-compose logs -f`
 
